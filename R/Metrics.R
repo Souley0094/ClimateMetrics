@@ -10,7 +10,7 @@ if(!require(dbplyr)){install.packages("cowplot");  library(cowplot)}
 
 AGTP <- function(RF, TH, effects){
 
-  if(effect == "albedo"){
+  if(effects == "albedo"){
     AGTP_alb <- matrix(0, nrow = TH + 1, ncol = 2)
 
     # Boucher & Reddy constants for temperature response
@@ -48,7 +48,7 @@ AGTP <- function(RF, TH, effects){
     dT <- dT[1:(TH + 1)]
     return(dT)
 
-  }else if(effect == "C"){
+  }else if(effects == "C"){
 
     # Radiative efficiency per kg gas, including indirect effects
     RE_CO2 <- 1.75171717997627e-15
@@ -87,8 +87,28 @@ AGTP <- function(RF, TH, effects){
     }
 
     # Sum across j and i components, then multiply with RE_CO2
+
     AGTP_CO2 <- RE_CO2 * rowSums(AGTP_CO2)
-    return(AGTP_CO2)
+
+    temp_CO2 <- function(E) {
+
+      # Ensure E is a numeric vector
+
+      E <- as.numeric(E)
+
+      # Pad E with zeros to match the length of H
+
+      E <- c(E, rep(0, TH))
+
+      # Convolution sum of E and AGTP_CO2
+
+      dT <- convolve(E, rev(AGTP_CO2), type = "open")
+
+      # Crop the array to return only the first TH + 1 elements
+
+      return(dT[1:(TH + 1)])
+    }
+
 
   }else if(effects == "N2O"){
 
@@ -101,26 +121,40 @@ AGTP <- function(RF, TH, effects){
     taoN2O <- 121
 
 
-    # Initialize AGTP_CO2 as a matrix of zeros
+    # Initialize AGTP_N2O as a matrix of zeros
 
-    AGTP_N2O <- matrix(0, nrow = TH + 1, ncol = 8)
+    AGTP_N2O <- matrix(0, nrow = TH + 1, ncol = 2)
 
     # Loop over j
+
     for (j in c(0, 1)) {
 
-      AGTP_N2O[, j + 1] <- a[1] * c[j + 1] * (1 - exp(-H / d[j + 1]))
+      AGTP_N2O[, j + 1] <- taoN2O * c[j + 1] / (taoN2O - d[j + 1]) * (exp(-H / taoN2O) - exp(-H / d[j + 1]))
 
-      # Loop over i
-      for (i in c(1, 2, 3)) {
-
-        AGTP_N2O[, j * 3 + 1 + i] <- a[i + 1] * tao[i + 1] * c[j + 1] / (tao[i + 1] - d[j + 1]) * (exp(-H / tao[i + 1]) - exp(-H / d[j + 1]))
-      }
     }
 
-    # Sum across j and i components, then multiply with RE_CO2
+    # Sum across j components and multiply with RE_N2O
+
     AGTP_N2O <- RE_N2O * rowSums(AGTP_N2O)
 
-    return(AGTP_N2O)
+    temp_N2O <- function(E) {
+
+      # Ensure E is a numeric vector
+
+      E <- as.numeric(E)
+
+      # Pad E with zeros to match the length of H
+
+      E <- c(E, rep(0, TH))
+
+      # Convolution sum of E and AGTP_N2O
+
+      dT <- convolve(E, rev(AGTP_N2O), type = "open")
+
+      # Crop the array to return only the first TH + 1 elements
+
+      return(dT[1:(TH + 1)])
+    }
 
   }else{
 
@@ -135,27 +169,40 @@ AGTP <- function(RF, TH, effects){
 
     # Initialize AGTP_CO2 as a matrix of zeros
 
-    AGTP_CH4 <- matrix(0, nrow = TH + 1, ncol = 8)
+    AGTP_CH4 <- matrix(0, nrow = TH + 1, ncol = 2)
 
     # Loop over j
+
     for (j in c(0, 1)) {
 
-      AGTP_CH4[, j + 1] <- a[1] * c[j + 1] * (1 - exp(-H / d[j + 1]))
+      AGTP_CH4[, j + 1] <- taoCH4 * c[j + 1] / (taoCH4 - d[j + 1]) * (exp(-H / taoCH4) - exp(-H / d[j + 1]))
 
-      # Loop over i
-      for (i in c(1, 2, 3)) {
-
-        AGTP_CH4[, j * 3 + 1 + i] <- a[i + 1] * tao[i + 1] * c[j + 1] / (tao[i + 1] - d[j + 1]) * (exp(-H / tao[i + 1]) - exp(-H / d[j + 1]))
-      }
     }
 
-    # Sum across j and i components, then multiply with RE_CO2
+    # Sum across j components and multiply with RE_CH4
+
     AGTP_CH4 <- RE_CH4 * rowSums(AGTP_CH4)
 
-    return(AGTP_CH4)
+    temp_CH4 <- function(E) {
+
+      # Ensure E is a numeric vector
+
+      E <- as.numeric(E)
+
+      # Pad E with zeros to match the length of H
+
+      E <- c(E, rep(0, TH))
+
+      # Convolution sum of E and AGTP_CH4
+
+      dT <- convolve(E, rev(AGTP_CH4), type = "open")
+
+      # Crop the array to return only the first TH + 1 elements
+
+      return(dT[1:(TH + 1)])
+    }
 
   }
-
 
 
 }
