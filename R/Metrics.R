@@ -159,7 +159,7 @@ AGTP <- function(RF,duration, effect){
 
     return(dT_N2O)
 
-  }else{
+  }else if(effect == "CH4"){
 
     # Radiative efficiency per kg gas, including indirect effects
 
@@ -202,6 +202,8 @@ AGTP <- function(RF,duration, effect){
 
     return(dT_CH4)
 
+  }else{
+    print("Error! put the right effect or gas")
   }
 
 
