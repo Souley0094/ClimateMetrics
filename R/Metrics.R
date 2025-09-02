@@ -207,6 +207,60 @@ AGTP <- function(RF,duration, effect){
   }
 
 
+}
 
+
+#Global warming potential of albedo based on Bright et al. 2016
+#GWP = RF(i)/AGWP_CO2 with RF daily or Monthly radiative forcing and AGWP_CO2
+# the absolute global warming potential of CO2 gas expressed in kg CO2 at time horizon (TH)
+
+
+
+GWP_albedo <- function(RF, TH){
+
+  Ag <-  510064472*10**6 # Earth surface area (m2)
+
+  A <-  10000 # Functional unit 1 ha = 10,000 m2
+
+  Area <- Ag/A # convert into global RF W/ha
+
+  AGWP_CO2 <- function(TH) {
+    # Atmospheric concentration
+    c0_CO2 <- 391       # background CO2 (ppm)
+    c1_CO2 <- c0_CO2 + 1
+
+    # Constants
+    m_air <- 28.97       # kg/mol
+    m_CO2 <- 44.0098     # kg/mol
+    m_tot <- 5.1352e18   # total mass of atmosphere (kg)
+
+    # Convert ppm to kg CO2
+    ppmv_to_kg_CO2 <- 1 / ((m_air / m_CO2) * (1e6 / m_tot))
+
+    alpha_CO2 <- 5.35
+
+    # Radiative forcing
+    RE_CO2_ppm <- alpha_CO2 * log(c1_CO2 / c0_CO2)
+    RE_CO2_kg  <- RE_CO2_ppm / ppmv_to_kg_CO2
+
+    # CO2 decay function
+    a0 <- 0.2173; a1 <- 0.2240; a2 <- 0.2824; a3 <- 0.2763
+    tao1 <- 394.4; tao2 <- 36.54; tao3 <- 4.304
+
+    # AGWP cumulative forcing
+    AGWP <- RE_CO2_kg * (
+      a0*TH +
+        a1*tao1*(1 - exp(-TH/tao1)) +
+        a2*tao2*(1 - exp(-TH/tao2)) +
+        a3*tao3*(1 - exp(-TH/tao3))
+    )
+
+    #return(AGWP)
+  }
+
+  RF <- RF/Area
+  GWP <- RF/AGWP_CO2(TH)
+
+  return(GWP)
 }
 
