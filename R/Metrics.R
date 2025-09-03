@@ -8,6 +8,18 @@ if(!require(dbplyr)){install.packages("dplyr");  library(dplyr)}
 if(!require(dbplyr)){install.packages("ggplot2");  library(ggplot2)}
 if(!require(dbplyr)){install.packages("cowplot");  library(cowplot)}
 
+#' Global mean temperature Change of albedo and GHG
+#'
+#' @param RF a value of a vector of values of albedo or GHG radiaive forcings
+#' @param duration  An integer guiding the  number of years for duration of emission scenario
+#' @param effect A string representing the effect e.g "albedo", "CO2" for carbon dioxyde etc...
+#'
+#' @returns A vector of values corresponding to the AGTP for a time horizon defined
+#' @export
+#'
+#' @examples AGTP(RF = -3, duration = 30, effect = "albedo")
+#' @examples AGTP(RF = -3, duration = 30, effect = "N2O")
+
 AGTP <- function(RF,duration, effect){
 
   Ag <-  510064472*10**6 # Earth surface area (m2)
@@ -216,6 +228,17 @@ AGTP <- function(RF,duration, effect){
 
 
 
+#' Global warming potential of albedo from Bright et al. 2016
+#'
+#' @param RF a value of a vector of values of albedo or GHG radiaive forcings
+#' @param TH  An integer representing the time horizon, i.e. evaluation period
+#'
+#' @returns A values in Kg CO2 eq per ha integrating the GWP of albedo of a given TH e.g. 20, 100
+#' @export
+#'
+#' @examples GWP_albedo(-3, 20)
+#' @examples GWP_labedo(-3,100)
+
 GWP_albedo <- function(RF, TH){
 
   Ag <-  510064472*10**6 # Earth surface area (m2)
@@ -264,3 +287,23 @@ GWP_albedo <- function(RF, TH){
   return(GWP)
 }
 
+
+
+#' Global warming potential metric for GHG
+#'
+#' @param x A numeric value or vector of numeric values of a GHG emission expressed into CO2 e.g 44/12 to expressed mass of C to mass of CO2 and 44/28 to convert from Mass N to mass of N2O
+#' @param IPCC_factor A value corresponding to IPCC conversion factor of a GHG e.g 1 for CO2, 28 for CH4 and 273 for N2O at 100 years time horizon (TH) refer to AR6 (IPCC; 2023)
+#'
+#' @returns Global warming potential values expressed in kg CO2 eq for a given TH
+#' @export
+#'
+#' @examples GWP(-280.3,273) # GWP of N2O for 100 years TH
+#' @examples GWP(-120.12,28) # GWP of CH4 for 100 years TH
+
+GWP <- function(x, IPCC_factor){
+
+  GWP <- x*IPCC_factor
+
+  return(GWP)
+
+}
