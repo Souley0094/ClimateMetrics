@@ -1,7 +1,7 @@
 # Climate metrics!
 #
 # This package aim to make avaible somes climates metrics such as GWP (global warming potential) and AGTP (absolute global temperature change)
-# of CO2 N2O and CH4, and albedo change
+# of CO2 N2O and CH4, and albedo change based on Sieber et al. 2020 DOI:10.1111/gcbb.12682.
 
 
 if(!require(dbplyr)){install.packages("dplyr");  library(dplyr)}
