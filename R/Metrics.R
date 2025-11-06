@@ -222,7 +222,7 @@ AGTP <- function(RF,duration, effect){
 }
 
 
-#Global warming potential of albedo based on Bright et al. 2016
+#Global warming potential of albedo based on Bright et al. 2016 and Sieber et al. 2020
 #GWP = RF(i)/AGWP_CO2 with RF daily or Monthly radiative forcing and AGWP_CO2
 # the absolute global warming potential of CO2 gas expressed in kg CO2 at time horizon (TH)
 
